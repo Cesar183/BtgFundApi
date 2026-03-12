@@ -1,0 +1,294 @@
+{
+  "info": {
+    "_postman_id": "5ec81a5f-c8d9-49a8-a409-76401de8fdf9",
+    "name": "BTG Fund Flow",
+    "description": "Complete flow for BTG Fund API: register -> login -> subscribe -> cancel -> history.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1 - Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"{{fullName}}\",\n  \"email\": \"{{runtimeEmail}}\",\n  \"phone\": \"{{phone}}\",\n  \"preferredNotificationChannel\": \"{{preferredNotificationChannel}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        },
+        "description": "Creates a new user with initial balance COP 500000."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "var generated = 'cliente.demo+' + Date.now() + '@btg.com';",
+              "pm.collectionVariables.set('runtimeEmail', generated);",
+              "pm.collectionVariables.set('email', generated);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Register status is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "var json = pm.response.json();",
+              "if (json && json.token) {",
+              "    pm.collectionVariables.set('token', json.token);",
+              "}",
+              "if (json && json.email) {",
+              "    pm.collectionVariables.set('email', json.email);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Authenticates user and returns JWT token."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var json = pm.response.json();",
+              "pm.test('Token is present', function () {",
+              "    pm.expect(json.token).to.be.a('string').and.not.empty;",
+              "});",
+              "pm.collectionVariables.set('token', json.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 - Subscribe",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/subscriptions/{{fundId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "subscriptions",
+            "{{fundId}}"
+          ]
+        },
+        "description": "Subscribes user to fundId and stores subscriptionId for next step."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Subscribe status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var json = pm.response.json();",
+              "pm.test('Subscription id is present', function () {",
+              "    pm.expect(json.id).to.be.a('string').and.not.empty;",
+              "});",
+              "pm.collectionVariables.set('subscriptionId', json.id);",
+              "if (json.fundId) {",
+              "    pm.collectionVariables.set('fundId', json.fundId);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 - Cancel Subscription",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/subscriptions/{{subscriptionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "subscriptions",
+            "{{subscriptionId}}"
+          ]
+        },
+        "description": "Cancels active subscription and returns linked amount to available balance."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Cancel status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var json = pm.response.json();",
+              "pm.test('Subscription status is CANCELED', function () {",
+              "    pm.expect(json.status).to.eql('CANCELED');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 - Transactions History",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/transactions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "transactions"
+          ]
+        },
+        "description": "Returns user transaction history with OPEN and CANCEL operations."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('History status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var json = pm.response.json();",
+              "pm.test('History is an array', function () {",
+              "    pm.expect(json).to.be.an('array');",
+              "});",
+              "",
+              "var types = json.map(function (tx) { return tx.type; });",
+              "pm.test('History contains OPEN and CANCEL', function () {",
+              "    pm.expect(types).to.include('OPEN');",
+              "    pm.expect(types).to.include('CANCEL');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "fullName",
+      "value": "Cliente Demo"
+    },
+    {
+      "key": "email",
+      "value": "cliente.demo@btg.com"
+    },
+    {
+      "key": "runtimeEmail",
+      "value": ""
+    },
+    {
+      "key": "phone",
+      "value": "3001234567"
+    },
+    {
+      "key": "preferredNotificationChannel",
+      "value": "EMAIL"
+    },
+    {
+      "key": "password",
+      "value": "StrongPass123"
+    },
+    {
+      "key": "fundId",
+      "value": "1"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "subscriptionId",
+      "value": ""
+    }
+  ]
+}
