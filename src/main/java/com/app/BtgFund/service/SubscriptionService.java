@@ -23,6 +23,9 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Service with core investment-subscription business rules.
+ */
 public class SubscriptionService {
 
     private final FundRepository fundRepository;
@@ -31,6 +34,13 @@ public class SubscriptionService {
     private final UserAccountRepository userAccountRepository;
     private final NotificationDispatcher notificationDispatcher;
 
+        /**
+         * Subscribes a user to a fund and records an OPEN transaction.
+         *
+         * @param userId authenticated user id
+         * @param fundId target fund id
+         * @return created subscription as API response
+         */
     public SubscriptionResponse subscribe(String userId, String fundId) {
         var user = userAccountRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -78,6 +88,13 @@ public class SubscriptionService {
         return toSubscriptionResponse(savedSubscription);
     }
 
+        /**
+         * Cancels an active subscription, refunds linked amount and records a CANCEL transaction.
+         *
+         * @param userId authenticated user id
+         * @param subscriptionId subscription id to cancel
+         * @return updated subscription as API response
+         */
     public SubscriptionResponse cancel(String userId, String subscriptionId) {
         var user = userAccountRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -112,6 +129,12 @@ public class SubscriptionService {
         return toSubscriptionResponse(subscription);
     }
 
+        /**
+         * Returns transaction history for a user ordered by newest first.
+         *
+         * @param userId target user id
+         * @return transaction list
+         */
     public List<TransactionResponse> getTransactionHistory(String userId) {
         return fundTransactionRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
                 .map(tx -> new TransactionResponse(
@@ -125,12 +148,21 @@ public class SubscriptionService {
                 .toList();
     }
 
+        /**
+         * Returns active subscriptions for a user.
+         *
+         * @param userId target user id
+         * @return active subscription list
+         */
     public List<SubscriptionResponse> getActiveSubscriptions(String userId) {
         return subscriptionRepository.findByUserIdAndStatus(userId, SubscriptionStatus.ACTIVE).stream()
                 .map(this::toSubscriptionResponse)
                 .toList();
     }
 
+        /**
+         * Maps domain subscription entity into API response DTO.
+         */
     private SubscriptionResponse toSubscriptionResponse(Subscription subscription) {
         return new SubscriptionResponse(
                 subscription.getId(),

@@ -18,11 +18,17 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Service
+/**
+ * Service for JWT creation and validation.
+ */
 public class JwtService {
 
     private final SecretKey signingKey;
     private final long expirationMinutes;
 
+    /**
+     * Builds service with signing secret and token expiration settings.
+     */
     public JwtService(
             @Value("${security.jwt.secret}") String secret,
             @Value("${security.jwt.expiration-minutes:120}") long expirationMinutes) {
@@ -37,6 +43,12 @@ public class JwtService {
         this.expirationMinutes = expirationMinutes;
     }
 
+    /**
+     * Generates a signed JWT for authenticated user details.
+     *
+     * @param userDetails authenticated principal
+     * @return signed JWT token
+     */
     public String generateToken(UserDetails userDetails) {
         Instant now = Instant.now();
         Instant expiration = now.plusSeconds(expirationMinutes * 60);
@@ -52,10 +64,23 @@ public class JwtService {
                 .compact();
     }
 
+    /**
+     * Extracts username from token subject.
+     *
+     * @param token JWT token
+     * @return username/email encoded in token
+     */
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
+    /**
+     * Validates token ownership and expiration.
+     *
+     * @param token JWT token
+     * @param userDetails expected authenticated principal
+     * @return true if token is valid for principal
+     */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);

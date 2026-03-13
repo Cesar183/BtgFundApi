@@ -15,11 +15,21 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Adapter between application users and Spring Security UserDetails model.
+ */
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserAccountRepository userAccountRepository;
 
     @Override
+    /**
+     * Loads a user by email and maps roles into GrantedAuthority values.
+     *
+     * @param username user email
+     * @return mapped UserDetails object
+     * @throws UsernameNotFoundException when email does not exist
+     */
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var user = userAccountRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));

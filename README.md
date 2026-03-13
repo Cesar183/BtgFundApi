@@ -31,6 +31,11 @@ export JWT_EXP_MINUTES=120
 curl http://localhost:8080/actuator/health
 ```
 
+## Swagger
+- UI: `http://localhost:8080/swagger-ui/index.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Endpoints protegidos requieren token JWT (Authorize -> `Bearer <token>`)
+
 ## Probar flujo con Postman
 Coleccion incluida:
 - `docs/postman/BTG-Fund-Flow.postman_collection.json`

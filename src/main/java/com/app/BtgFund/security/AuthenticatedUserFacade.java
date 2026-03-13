@@ -11,10 +11,18 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * Utility component to resolve information from current authenticated user.
+ */
 public class AuthenticatedUserFacade {
 
     private final UserAccountService userAccountService;
 
+    /**
+     * Resolves current user id from security context.
+     *
+     * @return current user id
+     */
     public String currentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -25,6 +33,11 @@ public class AuthenticatedUserFacade {
         return userAccountService.getByEmail(email).getId();
     }
 
+    /**
+     * Resolves current user email from security context.
+     *
+     * @return current user email
+     */
     public String currentUserEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {

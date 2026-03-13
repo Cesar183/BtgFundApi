@@ -11,9 +11,15 @@ import com.app.BtgFund.domain.Fund;
 import com.app.BtgFund.repository.FundRepository;
 
 @Configuration
+/**
+ * Seeds default BTG funds when the collection is empty.
+ */
 public class FundDataInitializer {
 
     @Bean
+        /**
+         * Creates startup runner to insert initial fund catalog once.
+         */
     CommandLineRunner seedFunds(FundRepository fundRepository) {
         return args -> {
             if (fundRepository.count() > 0) {

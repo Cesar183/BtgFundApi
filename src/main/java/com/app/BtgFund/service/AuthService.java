@@ -25,6 +25,9 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * Service that handles user registration and authentication flow.
+ */
 public class AuthService {
 
     public static final BigDecimal INITIAL_BALANCE = new BigDecimal("500000");
@@ -35,6 +38,12 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
 
+    /**
+     * Registers a new user with initial balance and returns an access token.
+     *
+     * @param request registration payload
+     * @return auth response with JWT and user context
+     */
     public AuthResponse register(RegisterRequest request) {
         userAccountRepository.findByEmail(request.email()).ifPresent(user -> {
             throw new BusinessException("Email is already in use");
@@ -61,6 +70,12 @@ public class AuthService {
         return new AuthResponse(token, "Bearer", user.getEmail(), user.getRoles(), user.getAvailableBalance());
     }
 
+    /**
+     * Authenticates a user and returns a signed JWT token.
+     *
+     * @param request login payload
+     * @return auth response with JWT and user context
+     */
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password()));

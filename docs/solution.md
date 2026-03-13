@@ -100,3 +100,20 @@
 - Clean Code por capas: `api`, `service`, `repository`, `domain`, `security`
 - Pruebas unitarias para casos criticos de autenticacion y suscripciones
 
+## 8. Swagger / OpenAPI
+- Se integra `springdoc-openapi` para documentar automaticamente todos los endpoints.
+- UI interactiva: `http://localhost:8080/swagger-ui/index.html`
+- Especificacion JSON: `http://localhost:8080/v3/api-docs`
+- Seguridad JWT en Swagger: esquema `bearerAuth` configurado globalmente.
+- Endpoints de autenticacion (`/api/auth/register`, `/api/auth/login`) quedan publicos.
+- Endpoints protegidos aceptan token desde el boton `Authorize`.
+
+## 9. Ejecucion local
+La guia paso a paso de ejecucion local y pruebas con Postman se encuentra en:
+- `README.md`
+
+## 10. Parte 2 (SQL)
+Scripts SQL disponibles en:
+- `sql/schema_parte2.sql`
+- `sql/consulta_parte2.sql`
+
